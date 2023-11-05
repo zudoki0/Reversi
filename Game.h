@@ -31,5 +31,7 @@ public:
 	bool insertDisk(int x, int y, int source);
 	int isWonBy();
 	int getCurrentMove();
+	bool** getValidMoves(int player);
+	void renderMapOnConsole();
 };
 

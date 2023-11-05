@@ -17,8 +17,10 @@ private:
 public:
 	Disk(SDL_Renderer* renderer, int posX, int posY, DiskType type, int size);
 	void draw(int containerSize);
+	void drawOutline(int containerSize);
 	bool operator<(const Disk& other) const;
 	bool operator==(const Disk& other) const;
+	void setColor(Color color);
 	int getPosX();
 	int getPosY();
 };

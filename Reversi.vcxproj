@@ -134,19 +134,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Color.cpp" />
-    <ClCompile Include="Coord.cpp" />
     <ClCompile Include="Disk.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameRenderer.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Color.h" />
     <ClInclude Include="common.h" />
-    <ClInclude Include="Coord.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="Disk.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GameRenderer.h" />
     <ClInclude Include="Grid.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

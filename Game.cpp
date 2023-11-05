@@ -23,7 +23,7 @@ void Game::flipWithinRow(int x, int y, int source)
 			break;
 		}
 	}
-	for (int i = y + 1; i < width; i++) {
+	for (int i = y + 1; i < height; i++) {
 		if (map[x][i] == 0) {
 			break;
 		}
@@ -49,7 +49,7 @@ void Game::flipWithinColumn(int x, int y, int source)
 			break;
 		}
 	}
-	for (int i = x + 1; i < height; i++) {
+	for (int i = x + 1; i < width; i++) {
 		if (map[i][y] == 0) {
 			break;
 		}
@@ -221,7 +221,7 @@ bool Game::hasWithinRow(int x, int y, int source)
 	sourceFound = false;
 	amount.clear();
 
-	for (int i = y + 1; i < width; i++) {
+	for (int i = y + 1; i < height; i++) {
 		if (map[x][i] == 0) {
 			break;
 		}
@@ -268,7 +268,7 @@ bool Game::hasWithinColumn(int x, int y, int source)
 	sourceFound = false;
 	amount.clear();
 
-	for (int i = x + 1; i < height; i++) {
+	for (int i = x + 1; i < width; i++) {
 		if (map[i][y] == 0) {
 			break;
 		}
@@ -305,7 +305,7 @@ bool Game::isAdjacentToExisting(int x, int y, int source)
 			int new_x = x + dx;
 			int new_y = y + dy;
 
-			if (new_x >= 0 && new_x < height && new_y >= 0 && new_y < width && map[new_x][new_y] == target) {
+			if (new_x >= 0 && new_x < width && new_y >= 0 && new_y < height && map[new_x][new_y] == target) {
 				return true;
 			}
 		}
@@ -315,8 +315,8 @@ bool Game::isAdjacentToExisting(int x, int y, int source)
 
 bool Game::isFull()
 {
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
 			if (map[i][j] == 0) return false;
 		}
 	}
@@ -325,8 +325,8 @@ bool Game::isFull()
 
 bool Game::isOnlyWhiteDisk()
 {
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
 			if (map[i][j] == BLACK_DISK) return false;
 		}
 	}
@@ -335,8 +335,8 @@ bool Game::isOnlyWhiteDisk()
 
 bool Game::isOnlyBlackDisk()
 {
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
 			if (map[i][j] == WHITE_DISK) return false;
 		}
 	}
@@ -345,17 +345,17 @@ bool Game::isOnlyBlackDisk()
 
 Game::Game(int width, int height) : width(width), height(height), move(1)
 {
-	map = new int* [height];
-	for (int i = 0; i < height; i++) {
-		map[i] = new int[width];
+	map = new int* [width];
+	for (int i = 0; i < width; i++) {
+		map[i] = new int[height];
 		for (int j = 0; j < height; j++) {
 			map[i][j] = 0;
 		}
 	}
-	map[height / 2 - 1][width / 2 - 1] = 1;
-	map[height / 2][width / 2] = 1;
-	map[height / 2 - 1][width / 2] = 2;
-	map[height / 2][width / 2 - 1] = 2;
+	map[width / 2 - 1][height / 2 - 1] = 1;
+	map[width / 2][height / 2] = 1;
+	map[width / 2 - 1][height / 2] = 2;
+	map[width / 2][height / 2 - 1] = 2;
 }
 
 Game::~Game()
@@ -370,9 +370,9 @@ bool Game::isWithinGame(int x, int y) {
 	return x >= 0 && y >= 0 && x < width && y < height;
 }
 
-bool Game::isValidMove(int x, int y, int source) {
+bool Game::isValidMove(int x, int y, int player) {
 	if (!isWithinGame(x,y)) return false;
-	return (hasWithinColumn(x, y, source) || hasWithinDiagonal(x, y, source) || hasWithinRow(x, y, source)) && isAdjacentToExisting(x, y, source);
+	return (hasWithinColumn(x, y, player) || hasWithinDiagonal(x, y, player) || hasWithinRow(x, y, player)) && isAdjacentToExisting(x, y, player);
 }
 
 int** Game::getMap() {
@@ -382,8 +382,8 @@ int** Game::getMap() {
 bool Game::isWonByBlack()
 {
 	int white = 0, black = 0;
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
 			if (map[i][j] == BLACK_DISK) {
 				black++;
 			}
@@ -395,11 +395,11 @@ bool Game::isWonByBlack()
 	return black > white;
 }
 
-bool Game::insertDisk(int x, int y, int source) {
-	if(!isValidMove(x, y, source)) return false;
+bool Game::insertDisk(int x, int y, int player) {
+	if(!isValidMove(x, y, player)) return false;
 	if (map[x][y] != 0) return false;
-	map[x][y] = source;
-	flip(x, y, source);
+	map[x][y] = player;
+	flip(x, y, player);
 	if (move == BLACK_DISK) {
 		move = WHITE_DISK;
 	}
@@ -419,11 +419,11 @@ int Game::getCurrentMove() {
 	return move;
 }
 
-bool Game::hasValidMove(int source)
+bool Game::hasValidMove(int player)
 {
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
-			if (map[i][j] == 0 && isValidMove(i, j, source)) {
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+			if (map[i][j] == 0 && isValidMove(i, j, player)) {
 				return true;
 			}
 		}
@@ -449,4 +449,32 @@ int Game::isWonBy()
 		}
 	}
 	return 0;
+}
+
+bool** Game::getValidMoves(int player)
+{
+	bool** tempMap;
+	tempMap = new bool* [width];
+	for (int i = 0; i < width; i++) {
+		tempMap[i] = new bool[height];
+		for (int j = 0; j < height; j++) {
+			if (map[i][j] == 0 && isValidMove(i,j,player)) {
+				tempMap[i][j] = true;
+			} else {
+				tempMap[i][j] = false;
+			}
+		}
+	}
+	return tempMap;
+}
+
+void Game::renderMapOnConsole()
+{
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+			std::cout << map[i][j];
+		}
+		std::cout << '\n';
+	}
+	std::cout << '\n';
 }

@@ -16,7 +16,6 @@ public:
 	Grid(SDL_Renderer* renderer, int GRID_SIZE, int GRID_ROWS, int GRID_COLUMNS);
 	void draw();
 	void draw(int x, int y, int outlineWidth);
-	void drawCell(int row, int col, int outlineWidth);
 	void setFillColor(Color color);
 	void setOutlineColor(Color color);
 	void setGridSize(int pixels);
