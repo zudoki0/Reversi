@@ -2,15 +2,16 @@
 
 
 void GameRenderer::renderDisks(int** map, std::set<Disk>& disks) {
-    disks.clear();
     for (int i = 0; i < rowCount; i++) {
         for (int j = 0; j < colCount; j++) {
             if (map[i][j] == BLACK_DISK) {
                 Disk disk = Disk(renderer, i, j, DiskType::BLACK, 44);
+                disks.erase(disk);
                 disks.insert(disk);
             }
             else if (map[i][j] == WHITE_DISK) {
                 Disk disk = Disk(renderer, i, j, DiskType::WHITE, 44);
+                disks.erase(disk);
                 disks.insert(disk);
             }
         }
@@ -59,6 +60,6 @@ void GameRenderer::renderValidMoves(bool** map)
     }
 }
 
-GameRenderer::GameRenderer(SDL_Renderer* renderer, int rowCount, int colCount) : renderer(renderer), rowCount(rowCount), colCount(colCount)
+GameRenderer::GameRenderer(SDL_Renderer*& renderer, int rowCount, int colCount) : renderer(renderer), rowCount(rowCount), colCount(colCount)
 {
 }

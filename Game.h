@@ -9,6 +9,7 @@ private:
 	int height;
 	int** map;
 	int move;
+	bool** validOptionsMap;
 	void flip(int targetX, int targetY, int source);
 	void flipWithinRow(int x, int y, int source);
 	void flipWithinColumn(int x, int y, int source);

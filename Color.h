@@ -20,4 +20,3 @@ public:
 	Uint8 getBlue();
 	Uint8 getAlpha();
 };
-

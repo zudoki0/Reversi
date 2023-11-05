@@ -4,6 +4,7 @@
 #include <Disk.h>
 #include <Game.h>
 #include <GameRenderer.h>
+#include <TextRenderer.h>
 
 bool initSDL(SDL_Window*& window, SDL_Renderer*& renderer);
 
@@ -11,43 +12,44 @@ int main(int argsc, char* argv[]) {
     //POINTER AND CONSTS
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
+    TTF_Font* font = NULL;
     Grid* grid = NULL;
     Game* game = NULL;
     GameRenderer* gameRenderer = NULL;
-    int** map = NULL;
+    TextRenderer* textRenderer = NULL;
     const int gridSize = 48;
     const int highlightOutlineWidth = 4;
     const int numberOfRows = 8;
-    const int numberOfCols = 5;
-    const int sleepTime = 80;
+    const int numberOfCols = 8;
+    const int sleepTime = 50;
 
     //INIT
     if (!initSDL(window, renderer)) {
         return 1;
     }
     SDL_SetWindowTitle(window, "Reversi");
+    font = TTF_OpenFont("./fonts/ToThePointRegular-n9y4.ttf", 64);
+    if (font == NULL) {
+        std::cout << "No font was found! \n";
+        return 1;
+    }
 
     bool quit = false;
     SDL_Event e;
     int mouseX = 0;
     int mouseY = 0;
     std::set<Disk> disks;
-
+    
     grid = new Grid(renderer, gridSize, numberOfRows, numberOfCols);
     grid->setFillColor(Color(133, 200, 244,255));
 
     game = new Game(numberOfRows, numberOfCols);
-    map = game->getMap();
+    int **map = game->getMap();
     
     gameRenderer = new GameRenderer(renderer, numberOfRows, numberOfCols);
     gameRenderer->renderDisks(map, disks);
 
-    if (game->getCurrentMove() == BLACK_DISK) {
-        std::cout << "Black is moving.. \n";
-    }
-    else {
-        std::cout << "White is moving.. \n";
-    }
+    textRenderer = new TextRenderer(renderer);
 
     while (!quit) {
         // Clear the screen
@@ -63,19 +65,10 @@ int main(int argsc, char* argv[]) {
                 mouseY = e.button.y;
             }
             if (e.type == SDL_MOUSEBUTTONDOWN) {
+                
                 if (e.button.button == SDL_BUTTON_LEFT) {
-                    int mouseClickedX = e.button.x;
-                    int mouseClickedY = e.button.y;
-                    if (grid->isWithinGrid(mouseClickedX, mouseClickedY) && game->isValidMove(mouseClickedX / grid->getGridSize(), mouseClickedY / grid->getGridSize(), game->getCurrentMove())) {
-                        if (game->insertDisk(mouseClickedX / grid->getGridSize(), mouseClickedY / grid->getGridSize(), game->getCurrentMove())) {
-                            map = game->getMap();
-                            game->renderMapOnConsole();
-                            if (game->getCurrentMove() == BLACK_DISK) {
-                                std::cout << "Black is moving.. \n";
-                            }
-                            else {
-                                std::cout << "White is moving.. \n";
-                            }
+                    if (grid->isWithinGrid(e.button.x , e.button.y) && game->isValidMove(e.button.x / grid->getGridSize(), e.button.y / grid->getGridSize(), game->getCurrentMove())) {
+                        if (game->insertDisk(e.button.x / grid->getGridSize(), e.button.y / grid->getGridSize(), game->getCurrentMove())) {
                             gameRenderer->renderDisks(map, disks);
                         }
                     }
@@ -84,13 +77,6 @@ int main(int argsc, char* argv[]) {
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
         }
 
-        if (game->isWonBy() == BLACK_DISK) {
-            
-        }
-        else if (game->isWonBy() == WHITE_DISK) {
-
-        }
-        
         grid->draw();
         gameRenderer->renderValidMoves(game->getValidMoves(game->getCurrentMove()));
         gameRenderer->renderCursorHighlight(mouseX, mouseY, gridSize, highlightOutlineWidth);
@@ -98,13 +84,44 @@ int main(int argsc, char* argv[]) {
             disk.draw(gridSize);
         }
 
+        
+        if (game->isWonBy() == BLACK_DISK) {
+            textRenderer->renderText(font, "Black won!");
+        }
+        else if (game->isWonBy() == WHITE_DISK) {
+            textRenderer->renderText(font, "White won!");
+        }
+
+        if (game->getCurrentMove() == BLACK_DISK && game->isWonBy() == 0) {
+            textRenderer->renderText(font, "Black is moving..");
+        }
+        else if (game->isWonBy() == 0) {
+            textRenderer->renderText(font, "White is moving..");
+        }
+  
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
         // Update the screen
         SDL_RenderPresent(renderer);
     }
 
+    //Destroy all
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    TTF_CloseFont(font);
+    TTF_Quit();
+    if (grid != NULL) {
+        delete grid;
+    }
+    if (game != NULL) {
+        delete game;
+    }
+    if (gameRenderer != NULL) {
+        delete gameRenderer;
+    }
+    if (textRenderer != NULL) {
+        delete textRenderer;
+    }
 
 	return 0;
 }
@@ -124,6 +141,12 @@ bool initSDL(SDL_Window*& window, SDL_Renderer*& renderer) {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL) {
         printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+        return false;
+    }
+
+    if (TTF_Init() < 0)
+    {
+        printf("Couldn't initialize SDL TTF: %s\n", SDL_GetError());
         return false;
     }
 

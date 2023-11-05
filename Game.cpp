@@ -346,8 +346,10 @@ bool Game::isOnlyBlackDisk()
 Game::Game(int width, int height) : width(width), height(height), move(1)
 {
 	map = new int* [width];
+	validOptionsMap = new bool* [width];
 	for (int i = 0; i < width; i++) {
 		map[i] = new int[height];
+		validOptionsMap[i] = new bool[height];
 		for (int j = 0; j < height; j++) {
 			map[i][j] = 0;
 		}
@@ -362,8 +364,10 @@ Game::~Game()
 {
 	for (int i = 0; i < height; i++) {
 		delete map[i];
+		delete validOptionsMap[i];
 	}
 	delete map;
+	delete validOptionsMap;
 }
 
 bool Game::isWithinGame(int x, int y) {
@@ -453,19 +457,16 @@ int Game::isWonBy()
 
 bool** Game::getValidMoves(int player)
 {
-	bool** tempMap;
-	tempMap = new bool* [width];
 	for (int i = 0; i < width; i++) {
-		tempMap[i] = new bool[height];
 		for (int j = 0; j < height; j++) {
 			if (map[i][j] == 0 && isValidMove(i,j,player)) {
-				tempMap[i][j] = true;
+				validOptionsMap[i][j] = true;
 			} else {
-				tempMap[i][j] = false;
+				validOptionsMap[i][j] = false;
 			}
 		}
 	}
-	return tempMap;
+	return validOptionsMap;
 }
 
 void Game::renderMapOnConsole()

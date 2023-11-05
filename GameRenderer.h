@@ -8,9 +8,9 @@ class GameRenderer
 private:
 	int rowCount;
 	int colCount;
-	SDL_Renderer* renderer;
+	SDL_Renderer*& renderer;
 public:
-	GameRenderer(SDL_Renderer* renderer, int rowCount, int colCount);
+	GameRenderer(SDL_Renderer*& renderer, int rowCount, int colCount);
 	void renderDisks(int** map, std::set<Disk>& disks);
 	void renderCursorHighlight(int row, int col, int GRID_SIZE, int outlineWidth);
 	void renderValidMoves(bool** map);

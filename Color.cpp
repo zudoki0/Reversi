@@ -1,4 +1,5 @@
 #include "Color.h"
+#include "Color.h"
 
 
 Color::Color(Uint8 Red, Uint8 Green, Uint8 Blue, Uint8 Alpha) : Red(Red), Green(Green), Blue(Blue), Alpha(Alpha) {
@@ -6,7 +7,7 @@ Color::Color(Uint8 Red, Uint8 Green, Uint8 Blue, Uint8 Alpha) : Red(Red), Green(
 }
 
 Color::Color() : Red(0), Green(0), Blue(0), Alpha(255) {
-	
+
 }
 
 void Color::setRed(Uint8 amount) {

@@ -1,6 +1,6 @@
 #include "Disk.h"
 
-Disk::Disk(SDL_Renderer* renderer, int posX, int posY, DiskType type, int size) : renderer(renderer), posX(posX), posY(posY), type(type), size(size)
+Disk::Disk(SDL_Renderer*& renderer, int posX, int posY, DiskType type, int size) : renderer(renderer),posX(posX), posY(posY), type(type), size(size)
 {
     switch(type) {
     case WHITE:
@@ -12,7 +12,7 @@ Disk::Disk(SDL_Renderer* renderer, int posX, int posY, DiskType type, int size) 
     }
 }
 
-void Disk::draw(int containerSize)
+void Disk::draw(const int containerSize)
 {
     int centerX = posX * containerSize + containerSize / 2;
     int centerY = posY * containerSize + containerSize / 2;
@@ -29,7 +29,7 @@ void Disk::draw(int containerSize)
     }
 }
 
-void Disk::drawOutline(int containerSize)
+void Disk::drawOutline(const int containerSize)
 {
     int centerX = posX * containerSize + containerSize / 2;
     int centerY = posY * containerSize + containerSize / 2;
@@ -62,12 +62,4 @@ bool Disk::operator==(const Disk &other) const {
 void Disk::setColor(Color color)
 {
     this->color = color;
-}
-
-int Disk::getPosX() {
-    return posX;
-}
-
-int Disk::getPosY() {
-    return posY;
 }

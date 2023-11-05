@@ -1,2 +1,4 @@
-﻿  Disk.cpp
+﻿  GameRenderer.cpp
+  TextRenderer.cpp
+  Generating Code...
   Reversi.vcxproj -> C:\Users\Dung\Desktop\ReversiGame\Reversi\x64\Debug\Reversi.exe
