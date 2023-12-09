@@ -1,25 +1,22 @@
 #pragma once
-#include <Color.h>
 
-enum DiskType {
+enum DiskColor {
 	WHITE,
 	BLACK
 };
 
 class Disk
 {
-private:
+protected:
 	int posX, posY;
-	Color color;
-	DiskType type;
-	SDL_Renderer*& renderer;
-	int size;
+	DiskColor color;
 public:
-	Disk(SDL_Renderer*& renderer, int posX, int posY, DiskType type, int size);
-	void draw(const int containerSize);
-	void drawOutline(const int containerSize);
-	bool operator<(const Disk& other) const;
-	bool operator==(const Disk& other) const;
-	void setColor(Color color);
+	Disk();
+	int getPosX();
+	int getPosY();
+	void setPosX(int x);
+	void setPosY(int y);
+	DiskColor getColor();
+	void setColor(DiskColor color);
+	virtual void flip();
 };
-
