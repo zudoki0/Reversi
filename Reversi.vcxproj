@@ -133,23 +133,44 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="BlackDisk.cpp" />
+    <ClCompile Include="Board.cpp" />
+    <ClCompile Include="BoardBuilder.cpp" />
+    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="CursorHighlightRenderer.cpp" />
     <ClCompile Include="Disk.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameRenderer.cpp" />
-    <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="DiskRenderer.cpp" />
+    <ClCompile Include="GridRenderer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MoveCommand.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="ReversiBoardBuilder.cpp" />
+    <ClCompile Include="ReversiGameManager.cpp" />
+    <ClCompile Include="ReversiValidMoveSearcher.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
+    <ClCompile Include="ValidMoveRenderer.cpp" />
+    <ClCompile Include="WhiteDisk.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Color.h" />
+    <ClInclude Include="BlackDisk.h" />
+    <ClInclude Include="Board.h" />
+    <ClInclude Include="BoardBuilder.h" />
+    <ClInclude Include="Command.h" />
     <ClInclude Include="common.h" />
+    <ClInclude Include="CursorHighlightRenderer.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="Disk.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameRenderer.h" />
-    <ClInclude Include="Grid.h" />
+    <ClInclude Include="DiskRenderer.h" />
+    <ClInclude Include="GridRenderer.h" />
+    <ClInclude Include="IRenderer.h" />
+    <ClInclude Include="MoveCommand.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="ReversiBoardBuilder.h" />
+    <ClInclude Include="ReversiGameManager.h" />
+    <ClInclude Include="ReversiValidMoveSearcher.h" />
     <ClInclude Include="TextRenderer.h" />
+    <ClInclude Include="ValidMoveRenderer.h" />
+    <ClInclude Include="WhiteDisk.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

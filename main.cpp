@@ -1,10 +1,17 @@
 #include <common.h>
 #include <defs.h>
-#include <Grid.h>
+#include <GridRenderer.h>
 #include <Disk.h>
-#include <Game.h>
-#include <GameRenderer.h>
+#include <DiskRenderer.h>
 #include <TextRenderer.h>
+#include <ReversiBoardBuilder.h>
+#include <ReversiGameManager.h>
+#include <ReversiValidMoveSearcher.h>
+#include <Board.h>
+#include <MoveCommand.h>
+#include <CursorHighlightRenderer.h>
+#include <ValidMoveRenderer.h>
+#include <IRenderer.h>
 
 bool initSDL(SDL_Window*& window, SDL_Renderer*& renderer);
 
@@ -13,47 +20,58 @@ int main(int argsc, char* argv[]) {
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
     TTF_Font* font = NULL;
-    Grid* grid = NULL;
-    Game* game = NULL;
-    GameRenderer* gameRenderer = NULL;
-    TextRenderer* textRenderer = NULL;
+    Board* board = NULL;
+    BoardBuilder* boardBuilder = NULL;
+    ReversiGameManager* reversiGameManager = NULL;
+    ReversiValidMoveSearcher* reversiValidMoveSearcher = NULL;
+    MoveCommand* moveCommand = NULL;
     const int gridSize = 48;
     const int highlightOutlineWidth = 4;
-    const int numberOfRows = 8;
-    const int numberOfCols = 8;
-    const int sleepTime = 50;
+    const int sleepTime = 25;
+    const int reversiGameWidthAndHeight = 8;
+    const int fontSize = 64;
+    const SDL_Rect textContainer = { 0,384,384,116 };
+    const SDL_Color blackColor = { 0,0,0,255 };
+    const SDL_Color whiteColor = { 255,255,255,255 };
+    const SDL_Color lightBlueColor = { 0,128,255,255 };
 
-    //INIT
+    //INIT WINDOW, RENDERER AND FONT
     if (!initSDL(window, renderer)) {
         return 1;
     }
     SDL_SetWindowTitle(window, "Reversi");
-    font = TTF_OpenFont("./fonts/ToThePointRegular-n9y4.ttf", 64);
+    font = TTF_OpenFont("./fonts/ToThePointRegular-n9y4.ttf", fontSize);
     if (font == NULL) {
         std::cout << "No font was found! \n";
         return 1;
     }
 
+    //INIT TEMP VALUES FOR WINDOW
     bool quit = false;
     SDL_Event e;
     int mouseX = 0;
     int mouseY = 0;
-    std::set<Disk> disks;
-    
-    grid = new Grid(renderer, gridSize, numberOfRows, numberOfCols);
-    grid->setFillColor(Color(133, 200, 244,255));
 
-    game = new Game(numberOfRows, numberOfCols);
-    int **map = game->getMap();
-    
-    gameRenderer = new GameRenderer(renderer, numberOfRows, numberOfCols);
-    gameRenderer->renderDisks(map, disks);
+    //INIT GAME
+    boardBuilder = new ReversiBoardBuilder();
+    board = new Board(boardBuilder->build());
+    reversiGameManager = new ReversiGameManager(*board);
+    reversiValidMoveSearcher = new ReversiValidMoveSearcher(*board);
 
-    textRenderer = new TextRenderer(renderer);
+    //INIT OBJECT RENDERERS
+    std::vector<IRenderer*> renderers;
+    renderers.push_back(new GridRenderer(renderer, gridSize, reversiGameWidthAndHeight, reversiGameWidthAndHeight, lightBlueColor, blackColor));
+    renderers.push_back(new CursorHighlightRenderer(renderer, gridSize, highlightOutlineWidth));
+    renderers.push_back(new TextRenderer(renderer, font, "Waiting..", textContainer, whiteColor));
+    renderers.push_back(new DiskRenderer(renderer, *board, gridSize));
+    renderers.push_back(new ValidMoveRenderer(renderer, reversiValidMoveSearcher, *board, gridSize, reversiGameManager->getCurrentPlayer()));
+
+    //INIT COMMANDS
+    moveCommand = new MoveCommand(*reversiGameManager, 0, 0, *reversiValidMoveSearcher);
 
     while (!quit) {
         // Clear the screen
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_SetRenderDrawColor(renderer, blackColor.r, blackColor.g, blackColor.b, blackColor.a);
         SDL_RenderClear(renderer);
 
         while (SDL_PollEvent(&e)) {
@@ -67,62 +85,63 @@ int main(int argsc, char* argv[]) {
             if (e.type == SDL_MOUSEBUTTONDOWN) {
                 
                 if (e.button.button == SDL_BUTTON_LEFT) {
-                    if (grid->isWithinGrid(e.button.x , e.button.y) && game->isValidMove(e.button.x / grid->getGridSize(), e.button.y / grid->getGridSize(), game->getCurrentMove())) {
-                        if (game->insertDisk(e.button.x / grid->getGridSize(), e.button.y / grid->getGridSize(), game->getCurrentMove())) {
-                            gameRenderer->renderDisks(map, disks);
-                        }
-                    }
+                    delete moveCommand;
+                    moveCommand = new MoveCommand(*reversiGameManager, e.button.x / gridSize, e.button.y / gridSize, *reversiValidMoveSearcher);
+                    moveCommand->execute();
                 }
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
         }
 
-        grid->draw();
-        gameRenderer->renderValidMoves(game->getValidMoves(game->getCurrentMove()));
-        gameRenderer->renderCursorHighlight(mouseX, mouseY, gridSize, highlightOutlineWidth);
-        for (auto disk : disks) {
-            disk.draw(gridSize);
-        }
-
         
-        if (game->isWonBy() == BLACK_DISK) {
-            textRenderer->renderText(font, "Black won!");
-        }
-        else if (game->isWonBy() == WHITE_DISK) {
-            textRenderer->renderText(font, "White won!");
+        for (auto& r : renderers) {
+            if (TextRenderer* textRenderer = dynamic_cast<TextRenderer*>(r)) {
+                
+                if (reversiGameManager->getWinner() == BlackWin) {
+                    textRenderer->changeText("Black won!");
+                }
+                else if (reversiGameManager->getWinner() == WhiteWin) {
+                    textRenderer->changeText("White won!");
+                }
+                else if (reversiGameManager->getWinner() == Draw) {
+                    textRenderer->changeText("It's Draw!");
+                }
+                else if (reversiGameManager->getCurrentPlayer().getType() == BLACK) {
+                    textRenderer->changeText("Black is moving..");
+                }
+                else if (reversiGameManager->getCurrentPlayer().getType() == WHITE) {
+                    textRenderer->changeText("White is moving..");
+                }
+            }
+            else if (CursorHighlightRenderer* cursorRenderer = dynamic_cast<CursorHighlightRenderer*>(r)) {
+                cursorRenderer->setMousePos(mouseX, mouseY);
+            }
+            else if (ValidMoveRenderer* validMoveRenderer = dynamic_cast<ValidMoveRenderer*>(r)) {
+                validMoveRenderer->setPlayer(reversiGameManager->getCurrentPlayer());
+            }
+
+            r->render();
         }
 
-        if (game->getCurrentMove() == BLACK_DISK && game->isWonBy() == 0) {
-            textRenderer->renderText(font, "Black is moving..");
-        }
-        else if (game->isWonBy() == 0) {
-            textRenderer->renderText(font, "White is moving..");
-        }
   
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
-        // Update the screen
         SDL_RenderPresent(renderer);
     }
 
-    //Destroy all
+    //DESTROY ALL
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
     TTF_CloseFont(font);
     TTF_Quit();
-    if (grid != NULL) {
-        delete grid;
+    delete board;
+    delete boardBuilder;
+    delete moveCommand;
+    delete reversiGameManager;
+    delete reversiValidMoveSearcher;
+    for (IRenderer* renderer : renderers) {
+        delete renderer;
     }
-    if (game != NULL) {
-        delete game;
-    }
-    if (gameRenderer != NULL) {
-        delete gameRenderer;
-    }
-    if (textRenderer != NULL) {
-        delete textRenderer;
-    }
-
 	return 0;
 }
 
