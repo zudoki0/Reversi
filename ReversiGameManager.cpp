@@ -110,7 +110,7 @@ ReversiGameManager::ReversiGameManager(Board& board) : board(board)
 
 void ReversiGameManager::makeMove(int x, int y, ReversiValidMoveSearcher& rules)
 {
-	if (!rules.isValidMove(x, y, this->currentPlayer)) {
+	if (!rules.isValidMove(x, y, this->currentPlayer) || !board.isEmptyCell(x, y)) {
 		return;
 	}
 	if (this->currentPlayer.getType() == BLACK) {
